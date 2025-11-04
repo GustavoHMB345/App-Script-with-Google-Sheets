@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reserva de Chromebooks</title>
+  <base target="_top">
+  
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      height: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 520px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1rem;
+      background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: white;
+    }
+
+    h1 {
+      color: #1a202c;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #718096;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.75rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.6rem;
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.01em;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      transition: all 0.3s ease;
+      background-color: #f7fafc;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #ff8c42;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(255, 140, 66, 0.1);
+    }
+
+    input[type="text"]:hover,
+    input[type="email"]:hover,
+    input[type="date"]:hover,
+    select:hover {
+      border-color: #cbd5e0;
+    }
+
+    .horarios-container {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      background-color: #f7fafc;
+    }
+
+    .horarios-container::-webkit-scrollbar { width: 8px; }
+    .horarios-container::-webkit-scrollbar-track { background: #edf2f7; border-radius: 4px; }
+    .horarios-container::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+    .horarios-container::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      padding: 0.65rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .checkbox-item:hover {
+      background-color: #edf2f7;
+    }
+
+    .checkbox-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 0.85rem;
+      cursor: pointer;
+      accent-color: #ff8c42;
+    }
+
+    .checkbox-item label {
+      margin-bottom: 0;
+      font-weight: 500;
+      color: #2d3748;
+      cursor: pointer;
+      flex: 1;
+      transition: color 0.2s;
+    }
+    
+    /* --- NOVO CSS PARA HORÁRIOS BLOQUEADOS --- */
+    .checkbox-item.disabled {
+      opacity: 0.6;
+      background-color: transparent;
+      cursor: not-allowed;
+    }
+    
+    .checkbox-item.disabled label {
+      cursor: not-allowed;
+      color: #a0aec0;
+      text-decoration: line-through;
+    }
+    
+    .checkbox-item.disabled:hover {
+      background-color: transparent;
+    }
+    
+    #horarios-loader {
+      font-weight: 500;
+      font-size: 0.8rem;
+      color: #ff8c42;
+      display: none; /* Começa escondido */
+    }
+    /* --- FIM DO NOVO CSS --- */
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #ff8c42 0%, #ffad56 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3);
+      margin-top: 0.5rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 140, 66, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    #loader {
+      display: none;
+      margin: 1.5rem auto;
+      border: 4px solid #e2e8f0;
+      border-top: 4px solid #ff8c42;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #message {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 1rem;
+      border-radius: 12px;
+      display: none;
+      white-space: pre-wrap;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success {
+      background-color: #c6f6d5;
+      color: #22543d;
+      border: 2px solid #9ae6b4;
+      display: block !important;
+    }
+
+    .error {
+      background-color: #fed7d7;
+      color: #742a2a;
+      border: 2px solid #fc8181;
+      display: block !important;
+      text-align: left;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 2rem 1.5rem; }
+      body { padding: 1rem; }
+      h1 { font-size: 1.5rem; }
+      .icon { width: 56px; height: 56px; font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+     <div class="icon">
+       🐝
+     </div>
+     <h1>Reserva de Chromebooks Bright Bee</h1>
+     <p class="subtitle">Preencha os dados para confirmar sua reserva</p>
+    </div>
+    
+    <form id="reserva-form">
+      
+      <div class="form-group">
+        <label for="professor">Seu Nome (Professor)</label>
+        <input type="text" id="professor" name="professor" required placeholder="Ex: Prof. Silva">
+      </div>
+      
+      <div class="form-group">
+        <label for="data">Data da Reserva</label>
+        <input type="text" id="data" placeholder="DD/MM/AAAA" required
+               onfocus="handleDateFocus(this)" 
+               onblur="if(!this.value) this.type='text'"
+               onchange="buscarHorariosReservados(this.value)">
+      </div>
+      
+      <div class="form-group">
+        <label for="turma">Turma / Disciplina</label>
+        <input type="text" id="turma" name="turma" required placeholder="Ex: G5M2 / Matemática">
+      </div>
+      
+      <div class="form-group">
+        <label>Horários (Aula) - Selecione um ou mais 
+          <span id="horarios-loader">(Carregando...)</span>
+        </label>
+        <div class="horarios-container">
+          <div class="checkbox-item"><input type="checkbox" id="h1" name="horario" value="07:00 - 07:45"> <label for="h1">07:00 - 07:45 (1ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h2" name="horario" value="07:45 - 08:30"> <label for="h2">07:45 - 08:30 (2ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h3" name="horario" value="08:30 - 09:15"> <label for="h3">08:30 - 09:15 (3ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h4" name="horario" value="09:45 - 10:30"> <label for="h4">09:45 - 10:30 (4ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h5" name="horario" value="10:30 - 11:15"> <label for="h5">10:30 - 11:15 (5ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h6" name="horario" value="11:15 - 12:00"> <label for="h6">11:15 - 12:00 (6ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h7" name="horario" value="12:00 - 12:45"> <label for="h7">12:00 - 12:45 (7ª Aula Manhã)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h8" name="horario" value="13:15 - 14:00"> <label for="h8">13:15 - 14:00 (1ª Aula Tarde)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h9" name="horario" value="14:00 - 14:45"> <label for="h9">14:00 - 14:45 (2ª Aula Tarde)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h10" name="horario" value="14:45 - 15:30"> <label for="h10">14:45 - 15:30 (3ª Aula Tarde)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h11" name="horario" value="15:30 - 16:15"> <label for="h11">15:30 - 16:15 (4ª Aula Tarde)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h12" name="horario" value="16:45 - 17:30"> <label for="h12">16:45 - 17:30 (5ª Aula Tarde)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h13" name="horario" value="17:30 - 18:15"> <label for="h13">17:30 - 18:15 (6ª Aula Tarde)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="h14" name="horario" value="18:15 - 19:00"> <label for="h14">18:15 - 19:00 (7ª Aula Tarde)</label></div>
+         </div>
+       </div>
+       
+       <button type="submit" id="submitBtn">Confirmar Reserva</button>
+     </form>
+     
+     <div id="loader"></div>
+     <div id="message"></div>
+  </div>
+
+  <script>
+    /**
+     * LÓGICA DE ENVIO DO FORMULÁRIO (SUBMIT)
+     */
+    document.getElementById("reserva-form").addEventListener("submit", function(e) {
+      e.preventDefault(); 
+      
+      const messageEl = document.getElementById("message");
+      messageEl.style.display = "none";
+      messageEl.className = "";
+
+      const checkboxes = document.querySelectorAll('input[name="horario"]:checked');
+      const horariosSelecionados = Array.from(checkboxes).map(cb => cb.value);
+
+      if (horariosSelecionados.length === 0) {
+        showMessage("Por favor, selecione pelo menos um horário.", "error", true);
+        return;
+      }
+
+      const formData = {
+        professor: document.getElementById("professor").value,
+        data: document.getElementById("data").value,
+        horarios: horariosSelecionados, 
+        turma: document.getElementById("turma").value
+      };
+
+      const submitBtn = document.getElementById("submitBtn");
+      const loader = document.getElementById("loader");
+      
+      submitBtn.disabled = true;
+      loader.style.display = "block";
+      
+      google.script.run
+        .withSuccessHandler(handleSuccess) 
+        .withFailureHandler(handleFailure) 
+        .processarReserva(formData);
+    });
+
+    /**
+     * Sucesso no envio do formulário
+     */
+    function handleSuccess(response) {
+      const submitBtn = document.getElementById("submitBtn");
+      const loader = document.getElementById("loader");
+      loader.style.display = "none";
+      
+      if (response.success) {
+        showMessage(response.message, "success", true);
+        document.getElementById("reserva-form").reset();
+        document.getElementById("data").type = "text";
+        resetarCheckboxes(); // NOVO: Reabilita todos os checkboxes
+      } else {
+        showMessage(response.message, "error", false);
+      }
+      
+      submitBtn.disabled = false;
+    }
+
+    /**
+     * Falha no envio do formulário
+     */
+    function handleFailure(error) {
+      const submitBtn = document.getElementById("submitBtn");
+      const loader = document.getElementById("loader");
+      loader.style.display = "none";
+      submitBtn.disabled = false;
+      showMessage("Erro inesperado: " + error.message, "error", true);
+    }
+    
+    /**
+     * Função auxiliar para mostrar mensagens de status
+     */
+    function showMessage(text, type, centerAlign) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = type;
+      messageDiv.style.textAlign = centerAlign ? "center" : "left";
+      messageDiv.style.display = 'block'; // Garante que a mensagem seja exibida
+    }
+
+    /**
+     * LÓGICA DO INPUT DE DATA (placeholder inteligente)
+     */
+    function handleDateFocus(input) {
+      input.type = 'date';
+      const today = new Date().toISOString().split('T')[0];
+      input.setAttribute('min', today);
+    }
+    
+    function checkInitialDate() {
+      const dateInput = document.getElementById("data");
+      if (dateInput.value) {
+         dateInput.type = 'date';
+      }
+    }
+    window.onload = checkInitialDate;
+
+    
+    /* * --- NOVO: LÓGICA DE VERIFICAÇÃO DE CONFLITO EM TEMPO REAL ---
+     */
+    
+    /**
+     * 1. Chamada quando o usuário MUDA a data (onchange).
+     */
+    function buscarHorariosReservados(data) {
+      if (!data) {
+        resetarCheckboxes(); // Se a data for limpa, habilita tudo
+        return;
+      }
+      
+      document.getElementById("horarios-loader").style.display = "inline";
+      resetarCheckboxes(); // Habilita todos antes de checar
+      
+      // Chama a nova função do Code.gs
+      google.script.run
+        .withSuccessHandler(atualizarInterfaceDosCheckboxes)
+        .withFailureHandler(falhaAoBuscarHorarios)
+        .getReservasPorData(data); // 'data' está em AAAA-MM-DD
+    }
+
+    /**
+     * 2. (Sucesso) Desabilita visualmente os horários retornados.
+     */
+    function atualizarInterfaceDosCheckboxes(horariosReservados) {
+      document.getElementById("horarios-loader").style.display = "none";
+      
+      if (horariosReservados.length === 0) {
+        return; // Nenhum horário para desabilitar
+      }
+      
+      const todosCheckboxes = document.querySelectorAll('input[name="horario"]');
+      
+      todosCheckboxes.forEach(checkbox => {
+        // Se o valor (ex: "07:00 - 07:45") estiver na lista, desabilita
+        if (horariosReservados.includes(checkbox.value)) {
+          checkbox.disabled = true;
+          checkbox.checked = false; // Garante que não esteja marcado
+          checkbox.parentElement.classList.add("disabled"); // Adiciona a classe CSS
+        }
+      });
+    }
+
+    /**
+     * 3. (Falha) Apenas loga o erro, não trava o formulário.
+     */
+    function falhaAoBuscarHorarios(error) {
+       document.getElementById("horarios-loader").style.display = "none";
+       console.warn("Não foi possível buscar horários: " + error.message);
+       // Não é um erro crítico, o back-end fará a verificação final
+    }
+
+    /**
+     * 4. (Helper) Reabilita todos os checkboxes (chamado ao mudar data ou dar submit).
+     */
+    function resetarCheckboxes() {
+      const todosCheckboxesItens = document.querySelectorAll('.checkbox-item');
+      
+      todosCheckboxesItens.forEach(item => {
+        item.classList.remove("disabled");
+        const checkbox = item.querySelector('input[name="horario"]');
+        if (checkbox) {
+          checkbox.disabled = false;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
