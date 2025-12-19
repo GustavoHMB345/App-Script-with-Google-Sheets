@@ -190,8 +190,9 @@
 </div>
 
 <script>
- 
-  const API_URL = "https://script.google.com/macros/s/AKfycby7dfvvXktJxvH_XPystRqr_EcDcb92Z6wo_udcIffSTneTX097hbOEzj1d79Knyw97Kw/exec";
+  // --- CONFIGURAÇÃO ---
+  // IMPORTANTE: Se você reimplantou o backend, atualize a URL aqui.
+  const API_URL = "https://script.google.com/macros/s/AKfycbwGglxy4tGww82iD_N74uIohgbi8hOacsfE0EqSfNHeB-zk8I4fjUvEP-5wGoLe6w86ng/exec";
 
   let totalEstoque = 0;
   let disponibilidadeMap = {};
@@ -200,11 +201,10 @@
     // Configura data mínima para AMANHÃ
     const amanha = new Date();
     amanha.setDate(amanha.getDate() + 1);
-    // Ajusta para fuso horário local para pegar a data correta
     const amanhaString = amanha.toISOString().split("T")[0];
     document.getElementById("data").min = amanhaString;
     
-    // Pega parâmetro da URL
+    // Pega parâmetro da URL (ex: ?sala=LV-3.12)
     const urlParams = new URLSearchParams(window.location.search);
     const salaParam = urlParams.get('sala');
     
@@ -219,7 +219,7 @@
       method: "POST",
       redirect: "follow",
       headers: {
-        "Content-Type": "text/plain;charset=utf-8", // Evita CORS Preflight
+        "Content-Type": "text/plain;charset=utf-8",
       },
       body: JSON.stringify(payload)
     });
@@ -267,7 +267,7 @@
     callApi({ action: "consultarInventario", sala: salaVal })
       .then(data => {
         if (data.success) {
-          totalEstoque = data.total;
+          totalEstoque = data.total; // Recebe 25 do backend
           const tipo = data.context; 
           display.innerText = `Estoque ${tipo}: ${totalEstoque} Chromebooks`;
           
